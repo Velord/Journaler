@@ -1,0 +1,81 @@
+apply plugin: 'com.android.application'
+
+apply plugin: 'kotlin-android'
+
+apply plugin: 'kotlin-android-extensions'
+
+android {
+    compileSdkVersion 28
+    defaultConfig {
+        applicationId "com.example.velord.masteringandroiddevelopmentwithkotlin"
+        minSdkVersion 21
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        flavorDimensions "28"
+    }
+    buildTypes {
+        preproduction{
+            applicationIdSuffix".pre"
+        }
+        staging{
+            debuggable true
+            applicationIdSuffix".sta"
+        }
+        debug{
+            applicationIdSuffix".dev"
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    productFlavors {
+        demo {
+            applicationIdSuffix ".demo"
+            versionNameSuffix "-demo"
+        }
+        complete {
+            applicationIdSuffix ".complete"
+            versionNameSuffix "-complete"
+        }
+        special {
+            applicationIdSuffix ".special"
+            versionNameSuffix "-special"
+        }
+    }
+    sourceSets {
+        main {
+            java.srcDirs = [
+                    'src/main/kotlin',
+                    'src/common/kotlin',
+                    'src/debug/kotlin',
+                    'src/release/kotlin',
+                    'src/staging/kotlin',
+                    'src/preproduction/kotlin',
+                    'src/debug/java',
+                    'src/release/java',
+                    'src/staging/java',
+                    'src/preproduction/java',
+                    'src/androidTest/java',
+                    'src/androidTest/kotlin'
+            ]
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    //Retrofit and Gson
+    compile 'com.google.code.gson:gson:2.8.2'
+    compile 'com.squareup.retrofit2:retrofit:2.2.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.0.2'
+    compile 'com.squareup.okhttp3:okhttp:3.10.0'
+    compile 'com.squareup.okhttp3:logging-interceptor:3.6.0'
+}
