@@ -7,4 +7,10 @@
     <string name="pick_time">Pick time</string>
     <string name="lorem_ipsum_sit_dolore">Lorem ipsum sit dolore</string>
     <string name="hi">Hi!</string>
+    <string name="menu">Menu</string>
+    <string name="today">Today</string>
+    <string name="next7days">Next 7 Days</string>
+    <string name="notes">Notes</string>
+    <string name="todos">TODOs</string>
+    <string name="choose_a_type">Choose a type</string>
 </resources>
