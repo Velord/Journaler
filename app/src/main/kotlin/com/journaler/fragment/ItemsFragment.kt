@@ -1,5 +1,7 @@
 package com.journaler.fragment
 
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
@@ -9,6 +11,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.BounceInterpolator
 import com.example.velord.masteringandroiddevelopmentwithkotlin.R
 import com.journaler.activity.NoteActivity
 import com.journaler.activity.TODOActivity
@@ -51,16 +55,30 @@ class ItemsFragment : BaseFragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        animateFAB(
+            view!!.findViewById<FloatingActionButton>(R.id.fab),
+            false, 1L , 1L
+        )
+    }
+
     //always need view to find fab, given the fact that we are in fragment class
     private fun setFABOnClickListener(view: View){
         val btn = view.findViewById<FloatingActionButton>(R.id.fab)
         btn?.setOnClickListener {
+            animateFAB(btn)
+
             val items = arrayOf(
                 getString(R.string.notes),
                 getString(R.string.todos)
             )
             val builder = AlertDialog.Builder(this@ItemsFragment.context)
                 .setTitle(R.string.choose_a_type)
+                .setCancelable(true)
+                .setOnCancelListener {
+                    animateFAB(btn ,false)
+                }
                 .setItems(
                     items,
                     {_, which ->
@@ -72,7 +90,7 @@ class ItemsFragment : BaseFragment() {
                     }
                 )
             builder.show()
-              Log.v(tag, "FAB CLick")
+            Log.v(tag, "FAB CLick")
         }
     }
 
@@ -98,5 +116,31 @@ class ItemsFragment : BaseFragment() {
         intent.putExtras(data)
 
         startActivityForResult(intent , TODO_REQUEST)
+    }
+
+    private  fun animateFAB(btn: FloatingActionButton , expand: Boolean = true ,
+                            durationFirstSecondAnimation: Long = 1000 ,
+                            durationThirdAnimation: Long = 500){
+        val animationFirst =
+            ObjectAnimator.ofFloat(btn , "scaleX",
+                if (expand){1.5f} else {1.0f})
+        animationFirst.duration = durationFirstSecondAnimation
+        animationFirst.interpolator = BounceInterpolator()
+
+        val animationSecond =
+            ObjectAnimator.ofFloat(btn , "scaleY",
+                if (expand){1.5f} else {1.0f})
+        animationSecond.duration = durationFirstSecondAnimation
+        animationSecond.interpolator = BounceInterpolator()
+
+        val animationThird =
+            ObjectAnimator.ofFloat(btn , "alpha" ,
+                if (expand){0.3f} else {1.0f})
+        animationThird.duration = durationThirdAnimation
+        animationThird.interpolator = AccelerateInterpolator()
+
+        val setAnimations = AnimatorSet()
+        setAnimations.play(animationFirst).with(animationSecond).before(animationThird)
+        setAnimations.start()
     }
 }

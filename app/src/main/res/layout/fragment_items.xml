@@ -10,6 +10,9 @@
             android:background="@android:color/darker_gray" />
     <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab"
+            android:src="@drawable/add_plus"
+            android:scaleType="centerInside"
+            android:backgroundTint="@color/colorPrimary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"

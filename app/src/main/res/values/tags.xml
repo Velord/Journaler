@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tag_font_regular">FONT_REGULAR</string>
+    <string name="tag_font_bold">FONT_BOLD</string>
+</resources>
+        <!--To apply it open styles.xml and add tag to simple_button style:-->
+<!--<item name="android:tag">@string/tag_font_bold</item>-->

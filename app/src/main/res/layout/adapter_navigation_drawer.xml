@@ -5,6 +5,7 @@
               android:layout_height="match_parent"
               android:orientation="vertical">
     <Button
+            style="@style/simple_button_grey"
             android:id="@+id/drawer_item"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
