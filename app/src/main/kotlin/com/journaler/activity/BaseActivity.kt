@@ -2,9 +2,11 @@ package com.journaler.activity
 
 import android.app.Activity
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Typeface
 import android.os.Bundle
 import android.os.PersistableBundle
+import android.support.v4.app.ActivityCompat
 import android.support.v4.app.FragmentActivity
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
@@ -17,13 +19,17 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import com.example.velord.masteringandroiddevelopmentwithkotlin.R
+import com.journaler.permission.PermissionCompatActivity
 import kotlinx.android.synthetic.main.activity_header.*
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.*
+import java.util.jar.Manifest
 
-abstract class BaseActivity(): AppCompatActivity() {
+abstract class BaseActivity(): PermissionCompatActivity() {
     companion object {
         private var fontExoBold: Typeface? = null
         private var fontExoRegular: Typeface? = null
+        val REQUEST_GPS = 0
 
         fun applyFonts(view: View , ctx: Context){
             var vTag = ""
@@ -86,6 +92,10 @@ abstract class BaseActivity(): AppCompatActivity() {
         overridePendingTransition(R.anim.fade_in , R.anim.fade_out)
         setContentView(getLayout())
         setSupportActionBar(toolbar)
+        requestPermissions(
+            android.Manifest.permission.ACCESS_FINE_LOCATION ,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION
+        )
         Log.v(tag, "[ ON CREATE 1 ]")
     }
 
@@ -159,7 +169,6 @@ abstract class BaseActivity(): AppCompatActivity() {
             fontExoRegular =
                     Typeface.createFromAsset(assets , "fonts/Exo-Regular.otf")
         }
-
     }
 
     protected fun Activity.getAnimation(animation: Int): Animation =
