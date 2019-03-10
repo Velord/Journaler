@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
 abstract  class PermissionCompatActivity: AppCompatActivity() {
-    private val tag = "Permission extension"
+    private val tag = "PermissionCmptActvty"
     private val latestPermissionRequest  = AtomicInteger()
     private val permissionRequests = ConcurrentHashMap<Int , List<String>>()
     private val permissionCallbacks =
