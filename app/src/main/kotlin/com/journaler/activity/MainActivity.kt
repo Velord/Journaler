@@ -5,21 +5,18 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.support.v4.app.*
 import android.support.v4.view.GravityCompat
-import android.support.v7.app.AppCompatActivity
+import android.support.v4.view.ViewPager
 import android.util.Log
-import android.view.Gravity
 import android.view.MenuItem
 import com.example.velord.masteringandroiddevelopmentwithkotlin.R
-import com.journaler.Journaler
 import com.journaler.fragment.ItemsFragment
-import com.journaler.fragment.ManualFragment
 import com.journaler.fragment.MyDialogFragment
 import com.journaler.navigation.NavigationDrawerAdapter
 import com.journaler.navigation.NavigationDrawerItem
-import kotlinx.android.synthetic.main.activity_header.*
+import com.journaler.preferences.PreferencesConfiguration
+import com.journaler.preferences.PreferencesProvider
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : BaseActivity(){
@@ -27,9 +24,11 @@ class MainActivity : BaseActivity(){
     override fun getLayout(): Int = R.layout.activity_main
     override fun getActivityTitle(): Int = R.string.app_name
 
+    private val keyPagePosition = "keyPagePosition"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        pager.adapter = ViewPagerAdapter(supportFragmentManager)
+        pagerProviderAndPositionViaSharedPreferences()
         instantiatedMenuItems()
     }
 
@@ -119,6 +118,32 @@ class MainActivity : BaseActivity(){
 //        That is how to call dialog fragment
         val myDialog = MyDialogFragment()
         myDialog.show(manager, "Dialog")
+    }
+
+    private fun pagerProviderAndPositionViaSharedPreferences(){
+        val provider = PreferencesProvider()
+        val config = PreferencesConfiguration("journaler_prefs" , Context.MODE_PRIVATE)
+        val preferences = provider.obtain(config , this)
+
+        pager.adapter = ViewPagerAdapter(supportFragmentManager)
+        pager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener{
+            override fun onPageScrollStateChanged(p0: Int) {
+                // Ignore
+            }
+
+            override fun onPageScrolled(p0: Int, p1: Float, p2: Int) {
+                // Ignore
+            }
+
+            override fun onPageSelected(p0: Int) {
+                Log.v(tag , "Page [$p0]")
+                preferences.edit().putInt(keyPagePosition , p0).apply()
+            }
+        })
+        //log when application is start or restart and set page 
+        val pagerPosition = preferences.getInt(keyPagePosition , 0)
+        pager.setCurrentItem(pagerPosition , true)
+        Log.v(tag , "Page [$pagerPosition]")
     }
 
     inner class ViewPagerAdapter(manager: FragmentManager)
