@@ -13,4 +13,5 @@
     <string name="notes">Notes</string>
     <string name="todos">TODOs</string>
     <string name="choose_a_type">Choose a type</string>
+    <string name="synchronize">Synchronize</string>
 </resources>

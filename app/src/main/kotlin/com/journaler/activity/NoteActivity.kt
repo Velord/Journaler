@@ -1,5 +1,6 @@
 package com.journaler.activity
 
+import android.content.Intent
 import android.location.Location
 import android.location.LocationListener
 import android.os.*
@@ -13,6 +14,8 @@ import com.journaler.database.Db
 import com.journaler.execution.TaskExecutor
 import com.journaler.model.Note
 import com.journaler.location.LocationProvider
+import com.journaler.model.MODE
+import com.journaler.service.DatabaseService
 import kotlinx.android.synthetic.main.activity_note.*
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
@@ -39,20 +42,14 @@ class NoteActivity : ItemActivity() {
                 val title = getNoteTitle()
                 val content = getNoteContent()
                 note = Note(title, content , l0)
-                executor.execute{
-                    val param = note
-                    var result = false
-                    param?.let {
-                        result = Db.note.insert(param)
-                    }
-                    //logging
-                    if (result)
-                        Log.i(tag , "Note inserted")
-                    else
-                        Log.e(tag , "Note not inserted")
-                    //change success indicator of operation
-                    sendMessage(result)
-                }
+                // Switching to intent service.
+                val dbIntent = Intent(this@NoteActivity,
+                    DatabaseService::class.java)
+                dbIntent.putExtra(DatabaseService.EXTRA_ENTRY , note)
+                dbIntent.putExtra(DatabaseService.EXTRA_OPERATION,
+                    MODE.CREATE.mode)
+                startService(dbIntent)
+                sendMessage(true)
             }
         }
 
@@ -65,7 +62,7 @@ class NoteActivity : ItemActivity() {
     }
     private val textWatcher = object : TextWatcher{
         override fun afterTextChanged(s: Editable?) {
-
+            updateNote()
         }
 
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -75,6 +72,7 @@ class NoteActivity : ItemActivity() {
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
             s?.let {
                 tryAsync(s.toString())
+                locationListener
             }
         }
     }
@@ -109,25 +107,17 @@ class NoteActivity : ItemActivity() {
                 and (!TextUtils.isEmpty(getNoteContent()))){
                 LocationProvider.subscribe(locationListener)
             }
-        }
-        else{
+        } else{
             note?.title = getNoteTitle()
             note?.message = getNoteContent()
-            executor.execute {
-                val param = note
-                var result = false
-                param?.let {
-                    result = Db.note.update(param)
-                }
-                //logging
-                if (result) {
-                    Log.i(tag, "Note updated.")
-                } else {
-                    Log.e(tag, "Note not updated.")
-                }
-                //change success indicator color of operation
-                sendMessage(result)
-            }
+            //switching to intent service
+            val dbIntent = Intent(this@NoteActivity ,
+                DatabaseService::class.java)
+            dbIntent.putExtra(DatabaseService.EXTRA_ENTRY , note)
+            dbIntent.putExtra(DatabaseService.EXTRA_OPERATION ,
+                MODE.EDIT.mode)
+            startService(dbIntent)
+            sendMessage(true)
         }
     }
 
