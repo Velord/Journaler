@@ -6,14 +6,18 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.support.design.widget.FloatingActionButton
+import android.support.v4.content.ContextCompat
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.BounceInterpolator
+import android.widget.ListView
 import com.example.velord.masteringandroiddevelopmentwithkotlin.R
+import com.journaler.Journaler
 import com.journaler.activity.NoteActivity
 import com.journaler.activity.TODOActivity
 import com.journaler.fragment.ItemsFragment.companion.TODO_REQUEST
@@ -39,6 +43,33 @@ class ItemsFragment : BaseFragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        onActivityResultTreatmentRequestAndResultCode(requestCode , resultCode)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        animateFAB(
+            view!!.findViewById<FloatingActionButton>(R.id.fab),
+            false, 1L , 1L
+        )
+        changeBackgroundItems(3000L)
+    }
+
+    private fun changeBackgroundItems(delay: Long){
+        val items = view?.findViewById<ListView>(R.id.items)
+        items?.let {
+            //we can use items.postDelayed or Handler().postDelayed
+            Handler().postDelayed({
+                if (!activity!!.isFinishing)
+                    items.setBackgroundColor(
+                        ContextCompat.getColor(
+                            Journaler.ctx!!,
+                            R.color.grey_text_middle))
+            },delay)
+        }
+    }
+
+    private fun onActivityResultTreatmentRequestAndResultCode(requestCode: Int ,  resultCode: Int){
         when(requestCode){
             TODO_REQUEST -> {
                 if (resultCode == Activity.RESULT_OK)
@@ -54,15 +85,6 @@ class ItemsFragment : BaseFragment() {
             }
         }
     }
-
-    override fun onResume() {
-        super.onResume()
-        animateFAB(
-            view!!.findViewById<FloatingActionButton>(R.id.fab),
-            false, 1L , 1L
-        )
-    }
-
     //always need view to find fab, given the fact that we are in fragment class
     private fun setFABOnClickListener(view: View){
         val btn = view.findViewById<FloatingActionButton>(R.id.fab)
