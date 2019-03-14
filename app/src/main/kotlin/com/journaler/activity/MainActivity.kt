@@ -140,7 +140,7 @@ class MainActivity : BaseActivity(){
                 preferences.edit().putInt(keyPagePosition , p0).apply()
             }
         })
-        //log when application is start or restart and set page 
+        //log when application is start or restart and set page
         val pagerPosition = preferences.getInt(keyPagePosition , 0)
         pager.setCurrentItem(pagerPosition , true)
         Log.v(tag , "Page [$pagerPosition]")

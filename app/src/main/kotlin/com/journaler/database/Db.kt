@@ -12,11 +12,11 @@ object Db {
     private val name = "students"
 
     val note = object: CRUD<Note>{
-        override fun insert(what: Note): Long {
+        override fun insert(what: Note): Boolean {
             val inserted = insert(listOf(what))
             if (!inserted.isEmpty())
-                return inserted[0]
-            return 0
+                return true
+            return false
         }
 
         override fun insert(what: Collection<Note>): List<Long> {
@@ -52,8 +52,12 @@ object Db {
             return items
         }
 
-        override fun update(what: Note): Int
-                = update(listOf(what))
+        override fun update(what: Note): Boolean{
+            val update =  update(listOf(what))
+            if (update == 0)
+                return false
+            else return true
+        }
 
         override fun update(what: Collection<Note>): Int {
             val db  = DbHelper(name , version).writableDatabase
@@ -200,11 +204,11 @@ object Db {
     }
 
     val todo = object : CRUD<TODO>{
-        override fun insert(what: TODO): Long {
+        override fun insert(what: TODO): Boolean {
             val inserted = insert(listOf(what))
             if (!inserted.isEmpty())
-                return inserted[0]
-            return 0
+                return true
+            return false
         }
 
         override fun insert(what: Collection<TODO>): List<Long> {
@@ -241,7 +245,13 @@ object Db {
             return items
         }
 
-        override fun update(what: TODO): Int = update(listOf(what))
+        override fun update(what: TODO): Boolean{
+            val update = update(listOf(what))
+            if (update == 0)
+                return false
+            else
+                return true
+        }
 
         override fun update(what: Collection<TODO>): Int {
             val db = DbHelper(name , version).writableDatabase

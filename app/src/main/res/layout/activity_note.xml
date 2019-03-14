@@ -17,13 +17,28 @@
                 android:background="@color/colorPrimary"
                 android:elevation="4dp" />
 
-        <EditText
-                style="@style/edit_text_transparent"
-                android:id="@+id/note_title"
+        <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/title"
-                android:padding="@dimen/form_padding" />
+                android:layout_height="wrap_content">
+
+            <View
+                    android:id="@+id/indicator"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_margin="10dp"
+                    android:background="@android:color/darker_gray" />
+
+            <EditText
+                    style="@style/edit_text_transparent"
+                    android:id="@+id/note_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/title"
+                    android:padding="@dimen/form_padding" />
+        </RelativeLayout>
+
         <EditText
                 style="@style/edit_text_gery_text"
                 android:id="@+id/note_content"
@@ -32,5 +47,6 @@
                 android:gravity="top"
                 android:hint="@string/your_note_content_goes_here"
                 android:padding="@dimen/form_padding" />
+
     </LinearLayout>
 </ScrollView>

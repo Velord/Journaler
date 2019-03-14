@@ -6,7 +6,7 @@ interface CRUD<T> where T : DbModel {
         val BROADCAST_EXTRAS_KEY_OPERATION_RESULT = "crud_result"
     }
 
-    fun insert(what: T): Long
+    fun insert(what: T): Boolean
 
     fun insert(what: Collection<T>): List<Long>
 
@@ -14,8 +14,7 @@ interface CRUD<T> where T : DbModel {
 
     fun delete(what: List<T>): Int
 
-
-    fun update(what: T): Int
+    fun update(what: T): Boolean
 
     fun update(what: Collection<T> ): Int
 
