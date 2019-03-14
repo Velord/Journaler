@@ -2,10 +2,9 @@ package com.journaler.activity
 
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
+import android.content.*
+import android.net.ConnectivityManager
+import android.os.BatteryManager
 import android.os.Bundle
 import android.os.IBinder
 import android.support.v4.app.*
@@ -55,14 +54,19 @@ class MainActivity : BaseActivity(){
         }
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         pagerProviderAndPositionViaSharedPreferences()
-        instantiatedMenuItems()
 
+        instantiatedMenuItems()
         val menuItems = mutableListOf<NavigationDrawerItem>()
         menuItems.add(synchronize)
+
+        buildAndStartBatteryChargeReceiver()
+        buildAndCallNotification(this)
+
+        val serviceIntent = Intent(this ,MainService::class.java)
+        startService(serviceIntent)
     }
 
     override fun onResume() {
@@ -91,6 +95,24 @@ class MainActivity : BaseActivity(){
             }
             else -> return super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun buildAndStartBatteryChargeReceiver(){
+        val receiver = object : BroadcastReceiver(){
+            override fun onReceive(context0: Context?, batteryStatus: Intent?) {
+                val status = batteryStatus?.getIntExtra(
+                    BatteryManager.EXTRA_STATUS , -1)
+                val isCharging = (status == BatteryManager.BATTERY_STATUS_CHARGING) or
+                        (status == BatteryManager.BATTERY_STATUS_FULL)
+                val chargePlug = batteryStatus?.getIntExtra(
+                    BatteryManager.EXTRA_PLUGGED , - 1)
+                val usbCharge = (chargePlug == BatteryManager.BATTERY_PLUGGED_USB)
+                val acCharge = (chargePlug == BatteryManager.BATTERY_PLUGGED_AC)
+            }
+        }
+
+        val intentFilter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+        registerReceiver(receiver , intentFilter)
     }
 
     private fun instantiatedMenuItems(){

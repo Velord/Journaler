@@ -3,6 +3,7 @@ package com.journaler.service
 import android.app.IntentService
 import android.content.Intent
 import android.util.Log
+import com.journaler.database.CRUD
 import com.journaler.database.Db
 import com.journaler.model.MODE
 import com.journaler.model.Note
@@ -59,5 +60,16 @@ class DatabaseService: IntentService("DatabaseService") {
                 }
             }
         }
+    }
+
+    private fun broadcastResult(result: Boolean){
+        val intent = Intent()
+        intent.putExtra(
+            CRUD.BROADCAST_EXTRAS_KEY_OPERATION_RESULT,
+            if (result)
+                1
+            else
+                0
+        )
     }
 }
