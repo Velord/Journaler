@@ -29,7 +29,7 @@ class NetworkReceiver: BroadcastReceiver() {
                 Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             val activeNetwork = cm.activeNetworkInfo
             val isConnected = activeNetwork != null &&
-                    activeNetwork.isConnectedOrConnecting
+                    activeNetwork.isConnected
 
             if (isConnected) {
                 Log.v(tag, "Connectivity [AVAILABLE]")

@@ -25,7 +25,6 @@ class Journaler(): Application(){
         val filter = IntentFilter(
             ConnectivityManager.CONNECTIVITY_ACTION)
         registerReceiver(networkReceiver, filter)
-//        startService()
     }
 
     override fun onLowMemory() {

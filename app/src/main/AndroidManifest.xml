@@ -66,5 +66,10 @@
                 <action android:name="android.intent.action.QUICKBOOT_POWEROFF"/>
             </intent-filter>
         </receiver>
+
+        <provider
+                android:exported="true"
+                android:authorities="com.journaler.provider"
+                android:name="com.journaler.provider.JournalerProvider"/>
     </application>
 </manifest>

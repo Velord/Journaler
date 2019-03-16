@@ -14,7 +14,6 @@ import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.Log
 import com.example.velord.masteringandroiddevelopmentwithkotlin.R
-import com.journaler.database.Db
 import com.journaler.execution.TaskExecutor
 import com.journaler.model.Note
 import com.journaler.location.LocationProvider

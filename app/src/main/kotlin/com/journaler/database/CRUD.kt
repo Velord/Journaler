@@ -1,5 +1,7 @@
 package com.journaler.database
 
+import kotlin.reflect.KClass
+
 interface CRUD<T> where T : DbModel {
     companion object {
         val BROADCAST_ACTION = "com.journaler.broadcast.crud"
@@ -8,19 +10,17 @@ interface CRUD<T> where T : DbModel {
 
     fun insert(what: T): Boolean
 
-    fun insert(what: Collection<T>): List<Long>
-
-    fun delete(what: T):Int
-
-    fun delete(what: List<T>): Int
+    fun insert(what: Collection<T>): Boolean
 
     fun update(what: T): Boolean
 
-    fun update(what: Collection<T> ): Int
+    fun update(what: Collection<T> ): Boolean
 
-    fun select(args: Pair<String ,String>): List<T>
+    fun select(args: Pair<String ,String>, clazz: KClass<T>): List<T>
 
-    fun select(args: Collection<Pair<String , String>>): List<T>
+    fun select(args: Collection<Pair<String , String>>, clazz: KClass<T>): List<T>
 
-    fun selectAll(): List<T>
+    fun delete(what: T, clazz: KClass<T>):Int
+
+    fun delete(what: List<T>, clazz: KClass<T>): Int
 }
