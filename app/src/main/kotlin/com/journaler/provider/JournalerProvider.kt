@@ -103,7 +103,7 @@ class JournalerProvider: ContentProvider() {
             }else
                 throw SQLException("Insert failed, no table for uri: " + uri)
         }
-        throw SQLException("Insert failde: " + uri)
+        throw SQLException("Insert failed: " + uri)
     }
 
     override fun update(
@@ -126,7 +126,7 @@ class JournalerProvider: ContentProvider() {
                     return updated
                 }
             }else
-                throw SQLException("Update failed, no tbale for uri: " + uri)
+                throw SQLException("Update failed, no table for uri: " + uri)
         }
         throw SQLException("Update failed: " + uri)
     }

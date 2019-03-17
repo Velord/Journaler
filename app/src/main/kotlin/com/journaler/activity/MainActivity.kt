@@ -3,7 +3,10 @@ package com.journaler.activity
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.*
+import android.location.Location
 import android.net.ConnectivityManager
+import android.net.Uri
+import android.os.AsyncTask
 import android.os.BatteryManager
 import android.os.Bundle
 import android.os.IBinder
@@ -13,6 +16,8 @@ import android.support.v4.view.ViewPager
 import android.util.Log
 import android.view.MenuItem
 import com.example.velord.masteringandroiddevelopmentwithkotlin.R
+import com.github.salomonbrys.kotson.fromJson
+import com.google.gson.Gson
 import com.journaler.fragment.ItemsFragment
 import com.journaler.fragment.MyDialogFragment
 import com.journaler.navigation.NavigationDrawerAdapter
@@ -21,6 +26,7 @@ import com.journaler.preferences.PreferencesConfiguration
 import com.journaler.preferences.PreferencesProvider
 import com.journaler.service.MainService
 import kotlinx.android.synthetic.main.activity_main.*
+import java.lang.StringBuilder
 
 class MainActivity : BaseActivity(){
     override val  tag = "MainActivity"
@@ -29,6 +35,7 @@ class MainActivity : BaseActivity(){
 
     private var service: MainService? = null
     private val keyPagePosition = "keyPagePosition"
+    private val gson = Gson()
 
     private val synchronize: NavigationDrawerItem by lazy {
         NavigationDrawerItem(
@@ -37,7 +44,9 @@ class MainActivity : BaseActivity(){
             false
         )
     }
-    private val serviceConnection = object : ServiceConnection{
+
+    private val serviceConnection
+            = object : ServiceConnection{
 
         override fun onServiceDisconnected(name: ComponentName?) {
             service = null
@@ -56,7 +65,13 @@ class MainActivity : BaseActivity(){
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        pagerProviderAndPositionViaSharedPreferences()
+
+        setPagerProviderAndPositionViaSharedPreferences()
+
+        insertSetOnClickListener()
+        updateSetOnClickListener()
+        deleteSetOnClickListener()
+        selectSetOnClickListener()
 
         instantiatedMenuItems()
         val menuItems = mutableListOf<NavigationDrawerItem>()
@@ -80,7 +95,6 @@ class MainActivity : BaseActivity(){
         super.onPause()
         unbindService(serviceConnection)
     }
-
     //like a button onClickListener
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when(item!!.itemId){
@@ -187,7 +201,7 @@ class MainActivity : BaseActivity(){
         myDialog.show(manager, "Dialog")
     }
 
-    private fun pagerProviderAndPositionViaSharedPreferences(){
+    private fun setPagerProviderAndPositionViaSharedPreferences(){
         val provider = PreferencesProvider()
         val config = PreferencesConfiguration("journaler_prefs" , Context.MODE_PRIVATE)
         val preferences = provider.obtain(config , this)
@@ -211,6 +225,144 @@ class MainActivity : BaseActivity(){
         val pagerPosition = preferences.getInt(keyPagePosition , 0)
         pager.setCurrentItem(pagerPosition , true)
         Log.v(tag , "Page [$pagerPosition]")
+    }
+
+    private fun selectSetOnClickListener(){
+        select.setOnClickListener {
+            val task = object : AsyncTask<Unit , Unit, Unit>(){
+                override fun doInBackground(vararg params: Unit?) {
+                    val selection = StringBuilder()
+                    val selectionArgs = mutableListOf<String>()
+                    val uri = Uri.parse(
+                        "content://com.journaler.provider/notes")
+                    val cursor = contentResolver.query(
+                        uri ,null, selection.toString(),
+                        selectionArgs.toTypedArray(), null
+                    )
+                    while (cursor.moveToNext()){
+                        val id = cursor.getLong(cursor.getColumnIndexOrThrow("_id"))
+
+                        val titleIdx = cursor.getColumnIndexOrThrow("title")
+                        val title = cursor.getString(titleIdx)
+
+                        val messageIdx = cursor.getColumnIndexOrThrow("message")
+                        val message = cursor.getString(messageIdx)
+
+                        val locationIdx = cursor.getColumnIndexOrThrow("location")
+                        val locationJson = cursor.getString(locationIdx)
+                        val location = gson.fromJson<Location>(locationJson)
+
+                        Log.v(tag, "Note retrieved via content provider " +
+                                "[$id , $title, $message, $location]")
+                    }
+                    cursor.close()
+                }
+            }
+            task.execute()
+        }
+    }
+
+    private fun insertSetOnClickListener(){
+        val task = object : AsyncTask<Unit, Unit, Unit>(){
+            override fun doInBackground(vararg params: Unit?) {
+                for (x in 0..5){
+                    val uri = Uri.parse(
+                        "content://com.journaler.provider/note")
+                    val location = Location("stub location $x")
+                    location.latitude = x.toDouble()
+                    location.longitude = x.toDouble()
+                    val values = ContentValues()
+                    values.put("title", "Title $x")
+                    values.put("message", "Message $x")
+                    values.put("location", gson.toJson(location))
+
+                    if (contentResolver.insert(uri, values) != null)
+                        Log.v(tag ,"Note inserted [$x]")
+                    else
+                        Log.e(tag , "Note not inserted [$x]")
+                }
+            }
+        }
+        task.execute()
+    }
+
+    private fun updateSetOnClickListener(){
+        val task = object : AsyncTask<Unit, Unit, Unit>(){
+            override fun doInBackground(vararg params: Unit?) {
+                val selection = StringBuilder()
+                val selectionArgs = mutableListOf<String>()
+                val uri = Uri.parse(
+                    "content://com.journaler.provider/notes")
+                val cursor  = contentResolver.query(
+                    uri, null, selection.toString(),
+                    selectionArgs.toTypedArray(), null
+                )
+                while (cursor.moveToNext()){
+                    val values = ContentValues()
+                    val id  = cursor.getLong(
+                        cursor.getColumnIndexOrThrow("_id")
+                    )
+                    val titleIdx = cursor.getColumnIndexOrThrow("title")
+                    val title = "${cursor.getString(titleIdx)} " +
+                            "upd: ${System.currentTimeMillis()}"
+
+                    val messageIdx = cursor.getColumnIndexOrThrow("message")
+                    val message = "${cursor.getString(messageIdx)} " +
+                            "upd: ${System.currentTimeMillis()}"
+
+                    val locationIdx = cursor.getColumnIndexOrThrow("location")
+                    val locationJson = cursor.getString(locationIdx)
+
+                    values.put("_id", id)
+                    values.put("title", title)
+                    values.put("message", message)
+                    values.put("location", locationJson)
+
+                    val updated = contentResolver.update(
+                        uri, values, "_id = ?",
+                        arrayOf(id.toString())
+                    )
+                    if (updated > 0)
+                        Log.v(tag, "Notes updated [$updated]")
+                    else
+                        Log.e(tag, "Notes not updated [$updated]")
+
+                }
+                cursor.close()
+            }
+        }
+        task.execute()
+    }
+
+    private fun deleteSetOnClickListener(){
+        val task = object : AsyncTask<Unit, Unit, Unit>(){
+            override fun doInBackground(vararg params: Unit?) {
+                val selection = StringBuilder()
+                val selectionArgs = mutableListOf<String>()
+                val uri = Uri.parse(
+                    "content://com.journaler.provider/notes"
+                )
+                val cursor = contentResolver.query(
+                    uri , null, selection.toString(),
+                    selectionArgs.toTypedArray(), null
+                )
+                while (cursor.moveToNext()){
+                    val id  = cursor.getLong(
+                        cursor.getColumnIndexOrThrow("_id")
+                    )
+                    val deleted = contentResolver.delete(
+                        uri , "_id = ?",
+                        arrayOf(id.toString())
+                    )
+                    if (deleted > 0)
+                        Log.v(tag, "Notes deleted [$deleted]")
+                    else
+                        Log.e(tag, "Notes not deleted [$deleted]")
+                }
+                cursor.close()
+            }
+        }
+        task.execute()
     }
 
     inner class ViewPagerAdapter(manager: FragmentManager)

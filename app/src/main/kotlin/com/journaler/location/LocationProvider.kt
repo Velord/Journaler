@@ -118,7 +118,7 @@ object LocationProvider {
 
             if (!permissionOk){
                 throw IllegalStateException(
-                    "Permissions required [ACCES_FINE_LOCATION] " +
+                    "Permissions required [ACCESS_FINE_LOCATION] " +
                             "[ACCESS_COARSE_LOCATION]"
                 )
             }

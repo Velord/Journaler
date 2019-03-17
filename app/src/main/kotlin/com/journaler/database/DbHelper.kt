@@ -14,12 +14,12 @@ class DbHelper(val dbName: String, val version: Int):
         val TABLE_TODOS = "todos"
         val TABLE_NOTES = "notes"
         val COLUMN_TITLE = "title"
-        val COLUMN_SCHEDULED = "sheduled"
+        val COLUMN_SCHEDULED = "scheduled"
         val COLUMN_MESSAGE = "message"
         val COLUMN_LOCATION = "location"
     }
 
-    private val tag = "Dbhelper"
+    private val tag = "DbHelper"
 
     private val createTableNotes = """
         Create table if not exists $TABLE_TODOS(

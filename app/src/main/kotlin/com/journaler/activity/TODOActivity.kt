@@ -2,7 +2,7 @@ package com.journaler.activity
 
 import android.os.Bundle
 import com.example.velord.masteringandroiddevelopmentwithkotlin.R
-import com.journaler.Interface.IRetrieveDataFromCausedActivity
+import com.journaler.`interface`.IRetrieveDataFromCausedActivity
 import kotlinx.android.synthetic.main.activity_todo.*
 
 class TODOActivity: ItemActivity() , IRetrieveDataFromCausedActivity{

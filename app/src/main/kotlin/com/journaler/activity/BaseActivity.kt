@@ -155,7 +155,7 @@ abstract class BaseActivity(): PermissionCompatActivity() {
         Log.v(tag, "Applying fonts [START]")
         val rootView: View = findViewById(android.R.id.content)
         applyFonts(rootView , this)
-        Log.v(tag , "Aplling fonts [END]")
+        Log.v(tag , "Apllying fonts [END]")
     }
 
     private fun initFonts(){
@@ -165,7 +165,7 @@ abstract class BaseActivity(): PermissionCompatActivity() {
                 Typeface.createFromAsset(assets , "fonts/Exo-Bold.otf")
         }
         if (fontExoRegular == null){
-            Log.v(tag , "Initializing fint [Exo2-Regular]")
+            Log.v(tag , "Initializing font [Exo2-Regular]")
             fontExoRegular =
                     Typeface.createFromAsset(assets , "fonts/Exo-Regular.otf")
         }

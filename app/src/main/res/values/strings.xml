@@ -14,4 +14,8 @@
     <string name="todos">TODOs</string>
     <string name="choose_a_type">Choose a type</string>
     <string name="synchronize">Synchronize</string>
+    <string name="update">Update</string>
+    <string name="delete">Delete</string>
+    <string name="select">Select</string>
+    <string name="insert">Insert</string>
 </resources>

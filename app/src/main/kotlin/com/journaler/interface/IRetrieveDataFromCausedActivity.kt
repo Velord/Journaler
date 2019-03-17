@@ -1,4 +1,4 @@
-package com.journaler.Interface
+package com.journaler.`interface`
 
 interface IRetrieveDataFromCausedActivity {
     fun retrieveDataFromCausedActivity()

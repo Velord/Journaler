@@ -12,7 +12,7 @@ import com.journaler.model.Note
 class DatabaseService: IntentService("DatabaseService") {
     companion object {
         val EXTRA_ENTRY = "entry"
-        val EXTRA_OPERATION = "opeartion"
+        val EXTRA_OPERATION = "operation"
     }
 
     val tag  = "Database Service"
@@ -39,16 +39,16 @@ class DatabaseService: IntentService("DatabaseService") {
                 val operation = intent0.getIntExtra(EXTRA_OPERATION ,-1)
                 when(operation){
                     MODE.CREATE.mode ->{
-                        val result = Content.insert(note)
-                        if (result)
+                        val result = Content.NOTE.insert(note)
+                        if (result > 0)
                             Log.i(tag , "Note inserted")
                         else
                             Log.e(tag ,"Note not inserted")
                     }
 
                     MODE.EDIT.mode -> {
-                        val result = Content.update(note)
-                        if(result)
+                        val result = Content.NOTE.update(note)
+                        if(result > 0)
                             Log.v(tag ,"Note updated")
                         else
                             Log.e(tag ,"Note not updated")

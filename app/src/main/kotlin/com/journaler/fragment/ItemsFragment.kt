@@ -20,9 +20,13 @@ import com.example.velord.masteringandroiddevelopmentwithkotlin.R
 import com.journaler.Journaler
 import com.journaler.activity.NoteActivity
 import com.journaler.activity.TODOActivity
+import com.journaler.adapter.EntryAdapter
+import com.journaler.database.Content
+import com.journaler.execution.TaskExecutor
 import com.journaler.fragment.ItemsFragment.companion.TODO_REQUEST
 import com.journaler.fragment.ItemsFragment.companion.NOTE_REQUEST
 import com.journaler.model.MODE
+import kotlinx.android.synthetic.main.fragment_items.view.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -35,7 +39,12 @@ class ItemsFragment : BaseFragment() {
     override val logTag = "Items fragment"
     override fun getLayout(): Int = R.layout.fragment_items
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    private val executor = TaskExecutor.getInstance(5)
+
+    override fun onCreateView(inflater: LayoutInflater,
+                              container: ViewGroup?,
+                              savedInstanceState: Bundle?
+    ): View? {
         val view  = inflater.inflate(getLayout() , container , false)
         setFABOnClickListener(view)
         return view
@@ -53,19 +62,31 @@ class ItemsFragment : BaseFragment() {
             false, 1L , 1L
         )
         changeBackgroundItems(3000L)
+
+        executor.execute {
+            val notes = Content.NOTE.selectAll()
+            val adapter = EntryAdapter(activity!!.baseContext, notes)
+            activity!!.runOnUiThread{
+                view?.findViewById<ListView>(R.id.items)?.adapter = adapter
+            }
+        }
     }
 
     private fun changeBackgroundItems(delay: Long){
-        val items = view?.findViewById<ListView>(R.id.items)
-        items?.let {
-            //we can use items.postDelayed or Handler().postDelayed
-            Handler().postDelayed({
-                if (!activity!!.isFinishing)
-                    items.setBackgroundColor(
-                        ContextCompat.getColor(
-                            Journaler.ctx!!,
-                            R.color.grey_text_middle))
-            },delay)
+        activity?.let {
+            val items = view?.findViewById<ListView>(R.id.items)
+            items?.let {
+                //we can use items.postDelayed or Handler().postDelayed
+                Handler().postDelayed({
+                    if (!(activity!!.isFinishing))
+                        items.setBackgroundColor(
+                            ContextCompat.getColor(
+                                Journaler.ctx!!,
+                                R.color.grey_text_middle
+                            )
+                        )
+                }, delay)
+            }
         }
     }
 

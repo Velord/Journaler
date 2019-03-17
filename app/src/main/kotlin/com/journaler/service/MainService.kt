@@ -106,7 +106,7 @@ class MainService : Service() , IDataSynchronization {
                             if (response.isSuccessful) {
                                 val notes = response.body()
                                 notes?.let {
-                                    Content.insert(notes)
+                                    Content.NOTE.insert(notes)
                                 }
                             }
                         }
@@ -138,7 +138,7 @@ class MainService : Service() , IDataSynchronization {
                             if (response.isSuccessful) {
                                 val todos = response.body()
                                 todos?.let {
-                                    Content.insert(todos)
+                                    Content.TODO.insert(todos)
                                 }
                             }
                         }

@@ -22,7 +22,7 @@ class NavigationDrawerAdapter(
         var view = convertView
         if(view == null)
             view = inflater.inflate(
-                R.layout.adapter_navigation_drawer , null
+                R.layout.adapter_navigation_drawer,null
             ) as LinearLayout
 
         val item  = items[position]

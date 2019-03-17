@@ -169,7 +169,7 @@ class NoteActivity : ItemActivity() {
 
         override fun doInBackground(vararg params: Unit?) {
             Log.i(tag, "doInBackground [$identifier] [START]")
-            Thread.sleep(5000)
+            Thread.sleep(1000)
             Log.i(tag , "doInBackground [$identifier] [END]")
             return Unit
         }
