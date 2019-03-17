@@ -6,5 +6,4 @@ abstract class DbEntry(
     var title: String,
     var message: String,
     var location: Location
-): DbModel() {
-}
+): DbModel()

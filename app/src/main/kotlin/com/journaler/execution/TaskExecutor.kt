@@ -1,6 +1,5 @@
 package com.journaler.execution
 
-import java.sql.Time
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor

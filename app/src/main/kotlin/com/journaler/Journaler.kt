@@ -1,5 +1,6 @@
 package com.journaler
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.content.Intent
@@ -9,10 +10,11 @@ import android.util.Log
 import com.journaler.receiver.NetworkReceiver
 import com.journaler.service.MainService
 
-class Journaler(): Application(){
+class Journaler: Application(){
 
     companion object {
         val TAG = "Journaler"
+        @SuppressLint("StaticFieldLeak")
         var ctx: Context? = null
     }
 

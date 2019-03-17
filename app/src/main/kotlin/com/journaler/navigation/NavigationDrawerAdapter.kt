@@ -1,5 +1,6 @@
 package com.journaler.navigation
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
@@ -17,6 +18,7 @@ class NavigationDrawerAdapter(
 
     private val tag = "Nvgtn. drwr. adptr."
 
+    @SuppressLint("InflateParams")
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val inflater = LayoutInflater.from(ctx)
         var view = convertView

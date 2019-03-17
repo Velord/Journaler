@@ -4,8 +4,6 @@ import kotlin.reflect.KClass
 
 interface CRUDOld<T> where T : DbModel {
     companion object {
-        val BROADCAST_ACTION = "com.journaler.broadcast.crud"
-        val BROADCAST_EXTRAS_KEY_OPERATION_RESULT = "crud_result"
     }
 
     fun insert(what: T): Boolean

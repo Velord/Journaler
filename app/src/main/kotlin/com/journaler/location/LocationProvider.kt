@@ -14,7 +14,6 @@ import com.journaler.Journaler
 import java.lang.ref.WeakReference
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
-import java.util.jar.Manifest
 
 object LocationProvider {
     private val tag = "Location Provider"

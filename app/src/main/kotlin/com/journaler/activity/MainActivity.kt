@@ -1,5 +1,6 @@
 package com.journaler.activity
 
+import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.*
@@ -229,7 +230,8 @@ class MainActivity : BaseActivity(){
 
     private fun selectSetOnClickListener(){
         select.setOnClickListener {
-            val task = object : AsyncTask<Unit , Unit, Unit>(){
+            val task = @SuppressLint("StaticFieldLeak")
+            object : AsyncTask<Unit , Unit, Unit>(){
                 override fun doInBackground(vararg params: Unit?) {
                     val selection = StringBuilder()
                     val selectionArgs = mutableListOf<String>()
@@ -263,7 +265,8 @@ class MainActivity : BaseActivity(){
     }
 
     private fun insertSetOnClickListener(){
-        val task = object : AsyncTask<Unit, Unit, Unit>(){
+        val task = @SuppressLint("StaticFieldLeak")
+        object : AsyncTask<Unit, Unit, Unit>(){
             override fun doInBackground(vararg params: Unit?) {
                 for (x in 0..5){
                     val uri = Uri.parse(

@@ -5,10 +5,15 @@ import android.animation.ObjectAnimator
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
+import android.database.Cursor
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.support.design.widget.FloatingActionButton
+import android.support.v4.app.LoaderManager
 import android.support.v4.content.ContextCompat
+import android.support.v4.content.CursorLoader
+import android.support.v4.content.Loader
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -23,10 +28,11 @@ import com.journaler.activity.TODOActivity
 import com.journaler.adapter.EntryAdapter
 import com.journaler.database.Content
 import com.journaler.execution.TaskExecutor
-import com.journaler.fragment.ItemsFragment.companion.TODO_REQUEST
 import com.journaler.fragment.ItemsFragment.companion.NOTE_REQUEST
+import com.journaler.fragment.ItemsFragment.companion.TODO_REQUEST
 import com.journaler.model.MODE
-import kotlinx.android.synthetic.main.fragment_items.view.*
+import com.journaler.provider.JournalerProvider
+import kotlinx.android.synthetic.main.fragment_items.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -40,6 +46,38 @@ class ItemsFragment : BaseFragment() {
     override fun getLayout(): Int = R.layout.fragment_items
 
     private val executor = TaskExecutor.getInstance(5)
+    private var adapter: EntryAdapter? = null
+
+    private val loaderCallback
+            = object : LoaderManager.LoaderCallbacks<Cursor>{
+        override fun onLoadFinished(p0: Loader<Cursor>, p1: Cursor?) {
+            p1?.let {
+                if (adapter == null){
+                    adapter = EntryAdapter(activity!!.baseContext, p1)
+                    items.adapter = adapter
+                }else
+                    adapter?.swapCursor(p1)
+            }
+        }
+
+        override fun onCreateLoader(p0: Int, p1: Bundle?): Loader<Cursor> {
+            return CursorLoader(
+                activity!!,
+                Uri.parse(JournalerProvider.URL_NOTES),
+                null, null,
+                null, null
+            )
+        }
+
+        override fun onLoaderReset(p0: Loader<Cursor>) {
+            adapter?.swapCursor(null)
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        loaderManager.initLoader(0, null, loaderCallback)
+    }
 
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
@@ -57,19 +95,12 @@ class ItemsFragment : BaseFragment() {
 
     override fun onResume() {
         super.onResume()
+        loaderManager.restartLoader(0, null, loaderCallback)
         animateFAB(
-            view!!.findViewById<FloatingActionButton>(R.id.fab),
+            view!!.findViewById(R.id.fab),
             false, 1L , 1L
         )
         changeBackgroundItems(3000L)
-
-        executor.execute {
-            val notes = Content.NOTE.selectAll()
-            val adapter = EntryAdapter(activity!!.baseContext, notes)
-            activity!!.runOnUiThread{
-                view?.findViewById<ListView>(R.id.items)?.adapter = adapter
-            }
-        }
     }
 
     private fun changeBackgroundItems(delay: Long){
@@ -90,7 +121,9 @@ class ItemsFragment : BaseFragment() {
         }
     }
 
-    private fun onActivityResultTreatmentRequestAndResultCode(requestCode: Int ,  resultCode: Int){
+    private fun onActivityResultTreatmentRequestAndResultCode(
+        requestCode: Int ,  resultCode: Int
+    ){
         when(requestCode){
             TODO_REQUEST -> {
                 if (resultCode == Activity.RESULT_OK)

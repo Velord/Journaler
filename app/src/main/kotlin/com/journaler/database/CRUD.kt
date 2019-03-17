@@ -1,7 +1,5 @@
 package com.journaler.database
 
-import kotlin.reflect.KClass
-
 interface CRUD<T> where T : DbModel {
     companion object {
         val BROADCAST_ACTION = "com.journaler.broadcast.crud"

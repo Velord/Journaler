@@ -1,6 +1,5 @@
 package com.journaler.api
 
-import android.service.voice.AlwaysOnHotwordDetector
 import com.journaler.model.Note
 import com.journaler.model.TODO
 import retrofit2.Call

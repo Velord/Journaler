@@ -1,5 +1,6 @@
 package com.journaler.activity
 
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -36,7 +37,6 @@ class NoteActivity : ItemActivity() {
         3,3,1, TimeUnit.SECONDS ,
         LinkedBlockingQueue<Runnable>()
     )
-    private val executor = TaskExecutor.getInstance(1)
     private val locationListener = object : LocationListener{
         override fun onLocationChanged(l0: Location?) {
             l0?.let {
@@ -159,6 +159,7 @@ class NoteActivity : ItemActivity() {
         tryAsync.executeOnExecutor(threadPoolExecutor)
     }
 
+    @SuppressLint("StaticFieldLeak")
     inner class TryAsync(val identifier: String): AsyncTask<Unit, Int , Unit>(){
         private val tag  = "TryAsync"
 
@@ -171,7 +172,6 @@ class NoteActivity : ItemActivity() {
             Log.i(tag, "doInBackground [$identifier] [START]")
             Thread.sleep(1000)
             Log.i(tag , "doInBackground [$identifier] [END]")
-            return Unit
         }
 
         override fun onCancelled() {
