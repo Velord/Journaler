@@ -73,6 +73,7 @@ class MainActivity : BaseActivity(){
         updateSetOnClickListener()
         deleteSetOnClickListener()
         selectSetOnClickListener()
+        //toolbar.setOnClickListener { callDialogFragment(supportFragmentManager) }
 
         instantiatedMenuItems()
         val menuItems = mutableListOf<NavigationDrawerItem>()
@@ -199,7 +200,7 @@ class MainActivity : BaseActivity(){
     private fun callDialogFragment(manager: FragmentManager){
 //        That is how to call dialog fragment
         val myDialog = MyDialogFragment()
-        myDialog.show(manager, "Dialog")
+        myDialog.show(manager, "My Dialog")
     }
 
     private fun setPagerProviderAndPositionViaSharedPreferences(){

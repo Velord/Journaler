@@ -12,24 +12,28 @@
 
         <Button
                 android:id="@+id/select"
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/select" />
 
         <Button
                 android:id="@+id/insert"
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/insert" />
 
         <Button
                 android:id="@+id/update"
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/update" />
 
         <Button
                 android:id="@+id/delete"
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/delete" />
