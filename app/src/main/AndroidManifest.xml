@@ -41,6 +41,14 @@
                 android:configChanges="orientation"
                 android:screenOrientation="portrait"/>
 
+        <activity android:name="com.journaler.activity.MigrationActivity"
+                  android:configChanges="orientation"
+                  android:screenOrientation="portrait"/>
+
+        <activity android:name="com.journaler.activity.MigrationActivity2"
+                  android:configChanges="orientation"
+                  android:screenOrientation="portrait"/>
+
         <service android:name="com.journaler.service.MainService"
                  android:exported="false"/>
         <service android:name="com.journaler.service.DatabaseService"
