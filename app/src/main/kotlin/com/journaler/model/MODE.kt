@@ -9,7 +9,7 @@ enum class MODE(val mode: Int) {
         val EXTRAS_KEY = "MODE"
 
         fun getByValue(value: Int): MODE {
-            values().forEach { it ->
+            values().forEach {
                 if (it.mode == value)
                     return it
             }

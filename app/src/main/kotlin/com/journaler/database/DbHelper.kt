@@ -7,30 +7,26 @@ import com.journaler.Journaler
 
 class DbHelper(val dbName: String, val version: Int):
     SQLiteOpenHelper(
-        Journaler.ctx ,
-        dbName ,
-        null ,
-        version ) {
+        Journaler.ctx , dbName , null , version
+    ) {
     companion object {
         val ID: String = "_id"
         val TABLE_TODOS = "todos"
         val TABLE_NOTES = "notes"
         val COLUMN_TITLE = "title"
-        val COLUMN_SCHEDULED = "sheduled"
+        val COLUMN_SCHEDULED = "scheduled"
         val COLUMN_MESSAGE = "message"
-        val COLUMN_LOCATION_LONGITUDE = "longtitude"
-        val COLUMN_LOCATION_LATITUDE = "altitude"
+        val COLUMN_LOCATION = "location"
     }
 
-    private val tag = "Dbhelper"
+    private val tag = "DbHelper"
 
     private val createTableNotes = """
         Create table if not exists $TABLE_TODOS(
             $ID integer primary key autoincrement,
             $COLUMN_TITLE text,
             $COLUMN_MESSAGE text,
-            $COLUMN_LOCATION_LATITUDE real,
-            $COLUMN_LOCATION_LONGITUDE real
+            $COLUMN_LOCATION text
         )
     """.trimIndent()
 
@@ -40,8 +36,7 @@ class DbHelper(val dbName: String, val version: Int):
             $COLUMN_TITLE text,
             $COLUMN_MESSAGE text,
             $COLUMN_SCHEDULED integer,
-            $COLUMN_LOCATION_LATITUDE real,
-            $COLUMN_LOCATION_LONGITUDE real
+            $COLUMN_LOCATION text
         )
     """.trimIndent()
 

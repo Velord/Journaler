@@ -1,37 +1,102 @@
 package com.journaler.activity
 
+import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.Context
-import android.content.Intent
+import android.content.*
+import android.location.Location
+import android.net.ConnectivityManager
+import android.net.Uri
+import android.os.AsyncTask
+import android.os.BatteryManager
 import android.os.Bundle
+import android.os.IBinder
 import android.support.v4.app.*
 import android.support.v4.view.GravityCompat
 import android.support.v4.view.ViewPager
 import android.util.Log
 import android.view.MenuItem
 import com.example.velord.masteringandroiddevelopmentwithkotlin.R
+import com.github.salomonbrys.kotson.fromJson
+import com.google.gson.Gson
 import com.journaler.fragment.ItemsFragment
 import com.journaler.fragment.MyDialogFragment
 import com.journaler.navigation.NavigationDrawerAdapter
 import com.journaler.navigation.NavigationDrawerItem
 import com.journaler.preferences.PreferencesConfiguration
 import com.journaler.preferences.PreferencesProvider
+import com.journaler.service.MainService
 import kotlinx.android.synthetic.main.activity_main.*
+import java.lang.StringBuilder
 
 class MainActivity : BaseActivity(){
     override val  tag = "MainActivity"
     override fun getLayout(): Int = R.layout.activity_main
     override fun getActivityTitle(): Int = R.string.app_name
 
+    private var service: MainService? = null
     private val keyPagePosition = "keyPagePosition"
+    private val gson = Gson()
+
+    private val synchronize: NavigationDrawerItem by lazy {
+        NavigationDrawerItem(
+            getString(R.string.synchronize),
+            Runnable { service?.synchronize() },
+            false
+        )
+    }
+
+    private val serviceConnection
+            = object : ServiceConnection{
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            service = null
+            synchronize.enabled = false
+        }
+
+        override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
+            if (binder is MainService.MainServiceBinder){
+                service = binder.getService()
+                service?.let {
+                    synchronize.enabled = true
+                }
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        pagerProviderAndPositionViaSharedPreferences()
+
+        setPagerProviderAndPositionViaSharedPreferences()
+
+        insertSetOnClickListener()
+        updateSetOnClickListener()
+        deleteSetOnClickListener()
+        selectSetOnClickListener()
+        //toolbar.setOnClickListener { callDialogFragment(supportFragmentManager) }
+
         instantiatedMenuItems()
+        val menuItems = mutableListOf<NavigationDrawerItem>()
+        menuItems.add(synchronize)
+
+        buildAndStartBatteryChargeReceiver()
+        buildAndCallNotification(this)
+
+        val serviceIntent = Intent(this ,MainService::class.java)
+        startService(serviceIntent)
     }
 
+    override fun onResume() {
+        super.onResume()
+        val intent = Intent(this , MainService::class.java)
+        bindService(intent , serviceConnection,
+            android.content.Context.BIND_AUTO_CREATE)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        unbindService(serviceConnection)
+    }
     //like a button onClickListener
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when(item!!.itemId){
@@ -46,6 +111,24 @@ class MainActivity : BaseActivity(){
             }
             else -> return super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun buildAndStartBatteryChargeReceiver(){
+        val receiver = object : BroadcastReceiver(){
+            override fun onReceive(context0: Context?, batteryStatus: Intent?) {
+                val status = batteryStatus?.getIntExtra(
+                    BatteryManager.EXTRA_STATUS , -1)
+                val isCharging = (status == BatteryManager.BATTERY_STATUS_CHARGING) or
+                        (status == BatteryManager.BATTERY_STATUS_FULL)
+                val chargePlug = batteryStatus?.getIntExtra(
+                    BatteryManager.EXTRA_PLUGGED , - 1)
+                val usbCharge = (chargePlug == BatteryManager.BATTERY_PLUGGED_USB)
+                val acCharge = (chargePlug == BatteryManager.BATTERY_PLUGGED_AC)
+            }
+        }
+
+        val intentFilter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+        registerReceiver(receiver , intentFilter)
     }
 
     private fun instantiatedMenuItems(){
@@ -117,10 +200,10 @@ class MainActivity : BaseActivity(){
     private fun callDialogFragment(manager: FragmentManager){
 //        That is how to call dialog fragment
         val myDialog = MyDialogFragment()
-        myDialog.show(manager, "Dialog")
+        myDialog.show(manager, "My Dialog")
     }
 
-    private fun pagerProviderAndPositionViaSharedPreferences(){
+    private fun setPagerProviderAndPositionViaSharedPreferences(){
         val provider = PreferencesProvider()
         val config = PreferencesConfiguration("journaler_prefs" , Context.MODE_PRIVATE)
         val preferences = provider.obtain(config , this)
@@ -140,10 +223,150 @@ class MainActivity : BaseActivity(){
                 preferences.edit().putInt(keyPagePosition , p0).apply()
             }
         })
-        //log when application is start or restart and set page 
+        //log when application is start or restart and set page
         val pagerPosition = preferences.getInt(keyPagePosition , 0)
         pager.setCurrentItem(pagerPosition , true)
         Log.v(tag , "Page [$pagerPosition]")
+    }
+
+    private fun selectSetOnClickListener(){
+        select.setOnClickListener {
+            val task = @SuppressLint("StaticFieldLeak")
+            object : AsyncTask<Unit , Unit, Unit>(){
+                override fun doInBackground(vararg params: Unit?) {
+                    val selection = StringBuilder()
+                    val selectionArgs = mutableListOf<String>()
+                    val uri = Uri.parse(
+                        "content://com.journaler.provider/notes")
+                    val cursor = contentResolver.query(
+                        uri ,null, selection.toString(),
+                        selectionArgs.toTypedArray(), null
+                    )
+                    while (cursor.moveToNext()){
+                        val id = cursor.getLong(cursor.getColumnIndexOrThrow("_id"))
+
+                        val titleIdx = cursor.getColumnIndexOrThrow("title")
+                        val title = cursor.getString(titleIdx)
+
+                        val messageIdx = cursor.getColumnIndexOrThrow("message")
+                        val message = cursor.getString(messageIdx)
+
+                        val locationIdx = cursor.getColumnIndexOrThrow("location")
+                        val locationJson = cursor.getString(locationIdx)
+                        val location = gson.fromJson<Location>(locationJson)
+
+                        Log.v(tag, "Note retrieved via content provider " +
+                                "[$id , $title, $message, $location]")
+                    }
+                    cursor.close()
+                }
+            }
+            task.execute()
+        }
+    }
+
+    private fun insertSetOnClickListener(){
+        val task = @SuppressLint("StaticFieldLeak")
+        object : AsyncTask<Unit, Unit, Unit>(){
+            override fun doInBackground(vararg params: Unit?) {
+                for (x in 0..5){
+                    val uri = Uri.parse(
+                        "content://com.journaler.provider/note")
+                    val location = Location("stub location $x")
+                    location.latitude = x.toDouble()
+                    location.longitude = x.toDouble()
+                    val values = ContentValues()
+                    values.put("title", "Title $x")
+                    values.put("message", "Message $x")
+                    values.put("location", gson.toJson(location))
+
+                    if (contentResolver.insert(uri, values) != null)
+                        Log.v(tag ,"Note inserted [$x]")
+                    else
+                        Log.e(tag , "Note not inserted [$x]")
+                }
+            }
+        }
+        task.execute()
+    }
+
+    private fun updateSetOnClickListener(){
+        val task = object : AsyncTask<Unit, Unit, Unit>(){
+            override fun doInBackground(vararg params: Unit?) {
+                val selection = StringBuilder()
+                val selectionArgs = mutableListOf<String>()
+                val uri = Uri.parse(
+                    "content://com.journaler.provider/notes")
+                val cursor  = contentResolver.query(
+                    uri, null, selection.toString(),
+                    selectionArgs.toTypedArray(), null
+                )
+                while (cursor.moveToNext()){
+                    val values = ContentValues()
+                    val id  = cursor.getLong(
+                        cursor.getColumnIndexOrThrow("_id")
+                    )
+                    val titleIdx = cursor.getColumnIndexOrThrow("title")
+                    val title = "${cursor.getString(titleIdx)} " +
+                            "upd: ${System.currentTimeMillis()}"
+
+                    val messageIdx = cursor.getColumnIndexOrThrow("message")
+                    val message = "${cursor.getString(messageIdx)} " +
+                            "upd: ${System.currentTimeMillis()}"
+
+                    val locationIdx = cursor.getColumnIndexOrThrow("location")
+                    val locationJson = cursor.getString(locationIdx)
+
+                    values.put("_id", id)
+                    values.put("title", title)
+                    values.put("message", message)
+                    values.put("location", locationJson)
+
+                    val updated = contentResolver.update(
+                        uri, values, "_id = ?",
+                        arrayOf(id.toString())
+                    )
+                    if (updated > 0)
+                        Log.v(tag, "Notes updated [$updated]")
+                    else
+                        Log.e(tag, "Notes not updated [$updated]")
+
+                }
+                cursor.close()
+            }
+        }
+        task.execute()
+    }
+
+    private fun deleteSetOnClickListener(){
+        val task = object : AsyncTask<Unit, Unit, Unit>(){
+            override fun doInBackground(vararg params: Unit?) {
+                val selection = StringBuilder()
+                val selectionArgs = mutableListOf<String>()
+                val uri = Uri.parse(
+                    "content://com.journaler.provider/notes"
+                )
+                val cursor = contentResolver.query(
+                    uri , null, selection.toString(),
+                    selectionArgs.toTypedArray(), null
+                )
+                while (cursor.moveToNext()){
+                    val id  = cursor.getLong(
+                        cursor.getColumnIndexOrThrow("_id")
+                    )
+                    val deleted = contentResolver.delete(
+                        uri , "_id = ?",
+                        arrayOf(id.toString())
+                    )
+                    if (deleted > 0)
+                        Log.v(tag, "Notes deleted [$deleted]")
+                    else
+                        Log.e(tag, "Notes not deleted [$deleted]")
+                }
+                cursor.close()
+            }
+        }
+        task.execute()
     }
 
     inner class ViewPagerAdapter(manager: FragmentManager)

@@ -2,13 +2,9 @@ package com.journaler.activity
 
 import android.app.Activity
 import android.content.Context
-import android.content.pm.PackageManager
 import android.graphics.Typeface
 import android.os.Bundle
 import android.os.PersistableBundle
-import android.support.v4.app.ActivityCompat
-import android.support.v4.app.FragmentActivity
-import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.View
@@ -20,12 +16,9 @@ import android.widget.EditText
 import android.widget.TextView
 import com.example.velord.masteringandroiddevelopmentwithkotlin.R
 import com.journaler.permission.PermissionCompatActivity
-import kotlinx.android.synthetic.main.activity_header.*
 import kotlinx.android.synthetic.main.activity_main.*
-import java.util.*
-import java.util.jar.Manifest
 
-abstract class BaseActivity(): PermissionCompatActivity() {
+abstract class BaseActivity: PermissionCompatActivity() {
     companion object {
         private var fontExoBold: Typeface? = null
         private var fontExoRegular: Typeface? = null
@@ -155,7 +148,7 @@ abstract class BaseActivity(): PermissionCompatActivity() {
         Log.v(tag, "Applying fonts [START]")
         val rootView: View = findViewById(android.R.id.content)
         applyFonts(rootView , this)
-        Log.v(tag , "Aplling fonts [END]")
+        Log.v(tag , "Apllying fonts [END]")
     }
 
     private fun initFonts(){
@@ -165,7 +158,7 @@ abstract class BaseActivity(): PermissionCompatActivity() {
                 Typeface.createFromAsset(assets , "fonts/Exo-Bold.otf")
         }
         if (fontExoRegular == null){
-            Log.v(tag , "Initializing fint [Exo2-Regular]")
+            Log.v(tag , "Initializing font [Exo2-Regular]")
             fontExoRegular =
                     Typeface.createFromAsset(assets , "fonts/Exo-Regular.otf")
         }

@@ -14,7 +14,6 @@ import com.journaler.Journaler
 import java.lang.ref.WeakReference
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
-import java.util.jar.Manifest
 
 object LocationProvider {
     private val tag = "Location Provider"
@@ -118,7 +117,7 @@ object LocationProvider {
 
             if (!permissionOk){
                 throw IllegalStateException(
-                    "Permissions required [ACCES_FINE_LOCATION] " +
+                    "Permissions required [ACCESS_FINE_LOCATION] " +
                             "[ACCESS_COARSE_LOCATION]"
                 )
             }

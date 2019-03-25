@@ -5,20 +5,34 @@ import android.animation.ObjectAnimator
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
+import android.database.Cursor
+import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
 import android.support.design.widget.FloatingActionButton
+import android.support.v4.app.LoaderManager
+import android.support.v4.content.ContextCompat
+import android.support.v4.content.CursorLoader
+import android.support.v4.content.Loader
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.BounceInterpolator
+import android.widget.ListView
 import com.example.velord.masteringandroiddevelopmentwithkotlin.R
+import com.journaler.Journaler
 import com.journaler.activity.NoteActivity
 import com.journaler.activity.TODOActivity
-import com.journaler.fragment.ItemsFragment.companion.TODO_REQUEST
+import com.journaler.adapter.EntryAdapter
+import com.journaler.database.Content
+import com.journaler.execution.TaskExecutor
 import com.journaler.fragment.ItemsFragment.companion.NOTE_REQUEST
+import com.journaler.fragment.ItemsFragment.companion.TODO_REQUEST
 import com.journaler.model.MODE
+import com.journaler.provider.JournalerProvider
+import kotlinx.android.synthetic.main.fragment_items.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -31,7 +45,44 @@ class ItemsFragment : BaseFragment() {
     override val logTag = "Items fragment"
     override fun getLayout(): Int = R.layout.fragment_items
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    private val executor = TaskExecutor.getInstance(5)
+    private var adapter: EntryAdapter? = null
+
+    private val loaderCallback
+            = object : LoaderManager.LoaderCallbacks<Cursor>{
+        override fun onLoadFinished(p0: Loader<Cursor>, p1: Cursor?) {
+            p1?.let {
+                if (adapter == null){
+                    adapter = EntryAdapter(activity!!.baseContext, p1)
+                    items.adapter = adapter
+                }else
+                    adapter?.swapCursor(p1)
+            }
+        }
+
+        override fun onCreateLoader(p0: Int, p1: Bundle?): Loader<Cursor> {
+            return CursorLoader(
+                activity!!,
+                Uri.parse(JournalerProvider.URL_NOTES),
+                null, null,
+                null, null
+            )
+        }
+
+        override fun onLoaderReset(p0: Loader<Cursor>) {
+            adapter?.swapCursor(null)
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        loaderManager.initLoader(0, null, loaderCallback)
+    }
+
+    override fun onCreateView(inflater: LayoutInflater,
+                              container: ViewGroup?,
+                              savedInstanceState: Bundle?
+    ): View? {
         val view  = inflater.inflate(getLayout() , container , false)
         setFABOnClickListener(view)
         return view
@@ -39,6 +90,40 @@ class ItemsFragment : BaseFragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        onActivityResultTreatmentRequestAndResultCode(requestCode , resultCode)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loaderManager.restartLoader(0, null, loaderCallback)
+        animateFAB(
+            view!!.findViewById(R.id.fab),
+            false, 1L , 1L
+        )
+        changeBackgroundItems(3000L)
+    }
+
+    private fun changeBackgroundItems(delay: Long){
+        activity?.let {
+            val items = view?.findViewById<ListView>(R.id.items)
+            items?.let {
+                //we can use items.postDelayed or Handler().postDelayed
+                Handler().postDelayed({
+                    if (!(activity!!.isFinishing))
+                        items.setBackgroundColor(
+                            ContextCompat.getColor(
+                                Journaler.ctx!!,
+                                R.color.grey_text_middle
+                            )
+                        )
+                }, delay)
+            }
+        }
+    }
+
+    private fun onActivityResultTreatmentRequestAndResultCode(
+        requestCode: Int ,  resultCode: Int
+    ){
         when(requestCode){
             TODO_REQUEST -> {
                 if (resultCode == Activity.RESULT_OK)
@@ -54,15 +139,6 @@ class ItemsFragment : BaseFragment() {
             }
         }
     }
-
-    override fun onResume() {
-        super.onResume()
-        animateFAB(
-            view!!.findViewById<FloatingActionButton>(R.id.fab),
-            false, 1L , 1L
-        )
-    }
-
     //always need view to find fab, given the fact that we are in fragment class
     private fun setFABOnClickListener(view: View){
         val btn = view.findViewById<FloatingActionButton>(R.id.fab)

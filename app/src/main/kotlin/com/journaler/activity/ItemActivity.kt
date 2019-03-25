@@ -9,7 +9,7 @@ import com.journaler.model.MODE
 abstract class ItemActivity:BaseActivity() {
     override fun getActivityTitle(): Int = R.string.app_name
     protected var mode = MODE.VIEW
-    protected var succes = Activity.RESULT_CANCELED
+    protected var success = Activity.RESULT_CANCELED
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -18,7 +18,7 @@ abstract class ItemActivity:BaseActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        setResult(succes)
+        setResult(success)
     }
 
     private fun setMode(){

@@ -36,5 +36,53 @@
                 android:configChanges="orientation"
                 android:screenOrientation="portrait"/>
 
+        <activity
+                android:name="com.journaler.activity.BindingActivity"
+                android:configChanges="orientation"
+                android:screenOrientation="portrait"/>
+
+        <activity android:name="com.journaler.activity.MigrationActivity"
+                  android:configChanges="orientation"
+                  android:screenOrientation="portrait"/>
+
+        <activity android:name="com.journaler.activity.MigrationActivity2"
+                  android:configChanges="orientation"
+                  android:screenOrientation="portrait"/>
+
+        <service android:name="com.journaler.service.MainService"
+                 android:exported="false"/>
+        <service android:name="com.journaler.service.DatabaseService"
+                 android:exported="false"/>
+
+        <receiver android:name="com.journaler.receiver.BootReceiver"
+                  android:enabled="true"
+                  android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_REPLACED"/>
+                <data android:scheme="package"/>
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_ADDED"/>
+                <data android:scheme="package"/>
+            </intent-filter>
+
+        </receiver>
+
+        <receiver android:name="com.journaler.receiver.ShutdownReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.ACTION_SHUTDOWN"/>
+                <action android:name="android.intent.action.QUICKBOOT_POWEROFF"/>
+            </intent-filter>
+        </receiver>
+
+        <provider
+                android:exported="true"
+                android:authorities="com.journaler.provider"
+                android:name="com.journaler.provider.JournalerProvider"/>
     </application>
 </manifest>
